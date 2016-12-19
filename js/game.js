@@ -3,10 +3,13 @@ var canvas;
 var canvasContext;
 var ballX = 50;
 var ballY = 50;
-var ballSpeedX = 5;
-var ballSpeedY = 5;
+var ballSpeedX = 7;
+var ballSpeedY = 7;
 var paddle1Y = 250;
-const PADDLE_HEIGHT =100;
+var paddle2Y = 250;
+const PADDLE_HEIGHT = 100;
+const PADDLE_WIDTH = 20;
+
 
 // Only executed our code once the DOM is ready.
 window.onload = function() {
@@ -18,6 +21,8 @@ window.onload = function() {
               draw();
               move();
             }, 1000 / fps);
+
+  //canvas.addEventListener('mousedown', restart());
   canvas.addEventListener('mousemove',
     function(evt) {
       var mousePos = calculateMousePos(evt);
@@ -35,25 +40,51 @@ function calculateMousePos(evt){
     y:mouseY
   };
 }
-
+function calculateComputerPos(){
+  var paddle2YCenter = paddle2Y + (PADDLE_HEIGHT/2);
+  if(paddle2YCenter < ballY - 35) {
+    paddle2Y += 6;
+  } else if(paddle2YCenter > ballY + 35) {
+    paddle2Y -= 6;
+  }
+}
 function draw() {
+  calculateComputerPos();
   //Background
   colourRect(0, 0, canvas.width, canvas.height, 'black');
-  //Left panel
-  colourRect(0, paddle1Y, 50, PADDLE_HEIGHT, 'white');
-
+  //Left player paddel
+  colourRect(0, paddle1Y, PADDLE_WIDTH, PADDLE_HEIGHT, 'white');
+  //Right computer paddel
+  colourRect(canvas.width-PADDLE_WIDTH, paddle2Y, canvas.width - PADDLE_WIDTH, PADDLE_HEIGHT, 'white');
   //Ball
   colourBall(ballX, ballY, 10, 0, Math.PI*2, true, 'white');
+  //canvasContext.fillText();
 }
 
 function move(){
   ballX = ballX + ballSpeedX;
   ballY = ballY + ballSpeedY;
 
-  if(ballX >= canvas.width || ballX < 0){
-    ballSpeedX = -ballSpeedX;
+  if(ballX >= canvas.width - PADDLE_WIDTH){
+    if(ballY > paddle2Y && ballY < paddle2Y + PADDLE_HEIGHT){
+      ballSpeedX = -ballSpeedX;
+    }
+    else{
+      reset();
+    }
   }
-  if(ballY >= canvas.height || ballY < 0){
+  if(ballX < PADDLE_WIDTH){
+    if(ballY > paddle1Y && ballY < paddle1Y + PADDLE_HEIGHT){
+      ballSpeedX = -ballSpeedX;
+    }
+    else{
+      reset();
+    }
+  }
+  if(ballY >= canvas.height ){
+    ballSpeedY = -ballSpeedY;
+  }
+  if(ballY < 0){
     ballSpeedY = -ballSpeedY;
   }
 }
@@ -67,4 +98,13 @@ function colourBall(centerX, centerY, width, height, arc, pos, drawColour){
   canvasContext.beginPath();
   canvasContext.arc(centerX, centerY, width, height, arc, pos);
   canvasContext.fill();
+}
+function restart(){
+
+}
+function reset(){
+  ballX = canvas.width/2;
+  ballY = canvas.height/2;
+  ballSpeedX = -ballSpeedX;
+  ballSpeedY = -ballSpeedY;
 }
